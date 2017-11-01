@@ -1,6 +1,7 @@
 from datetime import date
 import scipy.io
 import os
+import csv
 
 
 def extract_age_from_filename(filename: str) -> int:
@@ -31,51 +32,53 @@ def extract_age_from_filename(filename: str) -> int:
         return -1
 
 
-def parsing_mat(mat, data_type: str):
+def parsing_mat(mat, data_type: str, output_path: str):
     """
     parsing data information from mat file
     :param mat: matlab mat file
     :param data_type: 'imdb' | 'wiki'
-    :return: file path with age
+    :param output_path
+    :return: two lists
     """
     # dirty method to extract information from mat
     data = scipy.io.loadmat(mat)[data_type][0][0]
-    basepath = os.path.basename(mat)
+    basepath = os.path.dirname(mat)
     dob = data[0][0]
     photo_taken = data[1][0]
     full_path = data[2][0]  # get a single path full_path[i][0]
 
     # calculate age
     result = []
+    error_list = []
     unknown_age_number = 0
     for i in range(dob.size):
         days = date(photo_taken[i], 7, 1).toordinal() - dob[i]
-        if days > 0:
+        if days > 0 and date.fromordinal(days).year <= 100:
             age = date.fromordinal(days).year
             result.append((os.path.join(basepath, full_path[i][0]), age))
         else:
+            error_list.append((os.path.join(basepath, full_path[i][0]), days // 365))
             unknown_age_number += 1
     # imdb 560, wiki 1386 image <= 0
+    # including large than 100, imdb 719, wiki 1879
     print('unknown age number {}'.format(unknown_age_number))
-    return result
+
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+
+    with open(os.path.join(output_path, data_type + '.csv'), 'w') as csvfile:
+        path_age_writer = csv.writer(csvfile)
+        path_age_writer.writerows(result)
+
+    with open(os.path.join(output_path, data_type + '_error.csv'), 'w') as csvfile:
+        path_age_error_writer = csv.writer(csvfile)
+        path_age_error_writer.writerows(error_list)
+
+    return result, error_list
 
 
 if __name__ == '__main__':
-    # imdb_dir = '/home/gdshen/datasets/face/imdb_crop'
-    # wiki_dir = '/home/gdshen/datasets/face/wiki_crop'
-    #
-    # print(imdb_dir)
-    # print(wiki_dir)
-    # i = 0
-    # for dirpath, dirnames, filenames in os.walk(imdb_dir):
-    #     for filename in filenames:
-    #         if filename.endswith('.jpg'):
-    #             if extract_age_from_filename(filename) == -1:
-    #                 # print(filename)
-    #                 i += 1
-    #
-    # print(i)
-    matfile = '/home/gdshen/datasets/face/imdb_crop/imdb.mat'
-    matfile = '/home/gdshen/datasets/face/wiki_crop/wiki.mat'
-    parsing_mat(matfile, 'wiki')
-    pass
+    imdb_mat = '/home/gdshen/datasets/face/imdb_crop/imdb.mat'
+    wiki_mat = '/home/gdshen/datasets/face/wiki_crop/wiki.mat'
+    parsing_mat(imdb_mat, 'imdb', output_path='/home/gdshen/datasets/face/processed')
+    parsing_mat(wiki_mat, 'wiki', output_path='/home/gdshen/datasets/face/processed')
