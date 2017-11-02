@@ -6,8 +6,9 @@ from math import ceil
 
 
 class FaceDatasets(data.Dataset):
-    def __init__(self, csv_path, train=True) -> None:
+    def __init__(self, csv_path, train=True, transform=None) -> None:
         self.train = train
+        self.transform = transform
         with open(csv_path, 'r') as csv_file:
             facereader = csv.reader(csv_file)
             self.image_age_list = list(facereader)
@@ -30,6 +31,7 @@ class FaceDatasets(data.Dataset):
         else:
             img = Image.open(self.test_list[index][0])
             age = self.test_list[index][1]
+        img = self.transform(img)
         return img, age
 
 
