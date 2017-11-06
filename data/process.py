@@ -2,6 +2,7 @@ from datetime import date
 import scipy.io
 import os
 import csv
+import shutil
 
 
 def extract_age_from_filename(filename: str) -> int:
@@ -77,8 +78,27 @@ def parsing_mat(mat, data_type: str, output_path: str):
     return result, error_list
 
 
+def copy_according_to_csv(csv_path, input_dir, ouput_dir):
+    with open(csv_path) as f:
+        csvreader = csv.reader(f)
+        csvreader = list(csvreader)[1:]
+        filenames = [row[0].split('\\')[-1] for row in csvreader]
+
+    for filename in filenames:
+        shutil.copy(os.path.join(input_dir, filename), os.path.join(output_dir, filename))
+
+    print(f'copy {len(filenames)} files')
+
+
 if __name__ == '__main__':
-    imdb_mat = '/home/gdshen/datasets/face/imdb_crop/imdb.mat'
-    wiki_mat = '/home/gdshen/datasets/face/wiki_crop/wiki.mat'
-    parsing_mat(imdb_mat, 'imdb', output_path='/home/gdshen/datasets/face/processed')
-    parsing_mat(wiki_mat, 'wiki', output_path='/home/gdshen/datasets/face/processed')
+    # Process IMDB-WIKI
+    # imdb_mat = '/home/gdshen/datasets/face/imdb_crop/imdb.mat'
+    # wiki_mat = '/home/gdshen/datasets/face/wiki_crop/wiki.mat'
+    # parsing_mat(imdb_mat, 'imdb', output_path='/home/gdshen/datasets/face/processed')
+    # parsing_mat(wiki_mat, 'wiki', output_path='/home/gdshen/datasets/face/processed')
+
+    # Process Asian Data
+    csv_path = '/home/gdshen/datasets/face/asian/agegenderFilter_frontal.csv'
+    input_dir = '/home/gdshen/datasets/face/asian/yueda889'
+    output_dir = '/home/gdshen/datasets/face/asian/images'
+    copy_according_to_csv(csv_path, input_dir, output_dir)
