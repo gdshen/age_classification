@@ -15,19 +15,18 @@ class Net(nn.Module):
         self.classifier = nn.Sequential(
             nn.Linear(512 * 7 * 7, 4096),
             nn.ReLU(True),
-            nn.Linear(4096, 101)
+            nn.Dropout(0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU(True),
+            nn.Dropout(0.5),
+            nn.Linear(4096, 101, False),
+            nn.Softmax()
         )
 
     def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
+
+        x = x @ Variable(torch.arange(0, 101)).view(-1, 1)
         return x
-
-
-if __name__ == '__main__':
-    net = Net()
-    img = Variable(torch.Tensor(1, 3, 224, 224))
-    y = net(img)
-    print(y)
-
