@@ -14,36 +14,36 @@ from torch.optim.lr_scheduler import StepLR
 
 config = DefaultConfig()
 
-# train_loader = DataLoader(
-#     IMDBWIKIDatasets(config.imdb_csv_path, train=True, transform=transforms.Compose([
-#         transforms.Scale((224, 224)),
-#         transforms.ToTensor()
-#     ])), batch_size=config.batch_size, shuffle=True,
-#     num_workers=config.num_workers
-# )
-# test_loader = DataLoader(
-#     IMDBWIKIDatasets(config.imdb_csv_path, train=True, transform=transforms.Compose([
-#         transforms.Scale((224, 224)),
-#         transforms.ToTensor()
-#     ])), batch_size=config.batch_size, shuffle=False,
-#     num_workers=config.num_workers
-# )
-
 train_loader = DataLoader(
-    AsianFaceDatasets(config.asian_csv_train, config.asian_imgs_dir, train=True, transform=transforms.Compose([
+    IMDBWIKIDatasets(config.imdb_csv_train, train=True, transform=transforms.Compose([
         transforms.Scale((224, 224)),
         transforms.ToTensor()
     ])), batch_size=config.batch_size, shuffle=True,
     num_workers=config.num_workers
 )
-
 test_loader = DataLoader(
-    AsianFaceDatasets(config.asian_csv_test, config.asian_imgs_dir, train=False, transform=transforms.Compose([
+    IMDBWIKIDatasets(config.imdb_csv_test, train=False, transform=transforms.Compose([
         transforms.Scale((224, 224)),
         transforms.ToTensor()
     ])), batch_size=config.batch_size, shuffle=False,
     num_workers=config.num_workers
 )
+
+# train_loader = DataLoader(
+#     AsianFaceDatasets(config.asian_csv_train, config.asian_imgs_dir, train=True, transform=transforms.Compose([
+#         transforms.Scale((224, 224)),
+#         transforms.ToTensor()
+#     ])), batch_size=config.batch_size, shuffle=True,
+#     num_workers=config.num_workers
+# )
+#
+# test_loader = DataLoader(
+#     AsianFaceDatasets(config.asian_csv_test, config.asian_imgs_dir, train=False, transform=transforms.Compose([
+#         transforms.Scale((224, 224)),
+#         transforms.ToTensor()
+#     ])), batch_size=config.batch_size, shuffle=False,
+#     num_workers=config.num_workers
+# )
 
 model = Net()
 model.cuda()

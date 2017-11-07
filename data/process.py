@@ -125,8 +125,14 @@ if __name__ == '__main__':
     # output_dir = '/home/gdshen/datasets/face/asian/images'
     # copy_according_to_csv(csv_path, input_dir, output_dir)
 
-    # split train test
-    csv_path = '/home/gdshen/datasets/face/asian/agegenderFilter_frontal.csv'
-    output_dir = '/home/gdshen/datasets/face/asian/'
+    # split asian train test
+    # csv_path = '/home/gdshen/datasets/face/asian/agegenderFilter_frontal.csv'
+    # output_dir = '/home/gdshen/datasets/face/asian/'
+    # portion = 0.7
+    # training_testing_split(csv_path, output_dir, portion)
+
+    # split imdb train test
+    csv_path = '/home/gdshen/datasets/face/processed/imdb.csv'
+    output_dir = '/home/gdshen/datasets/face/processed'
     portion = 0.7
     training_testing_split(csv_path, output_dir, portion)

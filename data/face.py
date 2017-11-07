@@ -2,11 +2,9 @@ import torch.utils.data as data
 import csv
 from PIL import Image
 from random import shuffle
-from math import ceil
 import os
 
 
-# todo re inplement train test split logic
 class IMDBWIKIDatasets(data.Dataset):
     def __init__(self, csv_path, train=True, transform=None, target_transform=None) -> None:
         self.train = train
@@ -23,25 +21,14 @@ class IMDBWIKIDatasets(data.Dataset):
                                    list(facereader)]  # age read from csv is in type str, should convert to int
 
         shuffle(self.image_age_list)
-        portion = ceil(len(self.image_age_list) * 0.7)
-        self.train_list = self.image_age_list[:portion]
-        print(portion)
-        self.test_list = self.image_age_list[portion:]
 
     def __len__(self):
-        if self.train:
-            return len(self.train_list)
-        else:
-            return len(self.test_list)
+        return len(self.image_age_list)
 
     def __getitem__(self, index):
-        if self.train:
-            img = Image.open(self.train_list[index][0]).convert(
-                'RGB')  # 4 hours debug, find that there are grayscale images, not all images are rgb
-            age = self.train_list[index][1]
-        else:
-            img = Image.open(self.test_list[index][0]).convert('RGB')
-            age = self.test_list[index][1]
+        img = Image.open(self.image_age_list[index][0]).convert(
+            'RGB')  # 4 hours debug, find that there are grayscale images, not all images are rgb
+        age = self.image_age_list[index][1]
         if self.transform is not None:
             img = self.transform(img)
         if self.target_transform is not None:
