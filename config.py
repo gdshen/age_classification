@@ -14,3 +14,7 @@ class DefaultConfig:
     checkpoint_interval = 100
     checkpoint_dir = '/home/gdshen/datasets/checkpoint'
     logs_dir = '/home/gdshen/datasets/logs/'
+    fc_learning_rate = 0.001
+    weight_decay = 0.0005
+    decay_epoches = 10
+    decay_gamma = 0.1

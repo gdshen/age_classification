@@ -10,6 +10,7 @@ from data.face import IMDBWIKIDatasets, AsianFaceDatasets
 from models.net import Net
 import os
 from tensorboardX import SummaryWriter
+from torch.optim.lr_scheduler import StepLR
 
 config = DefaultConfig()
 
@@ -47,11 +48,21 @@ test_loader = DataLoader(
 model = Net()
 model.cuda()
 
-optimizer = optim.SGD(model.parameters(), lr=config.learning_rate, momentum=config.momentum)
+optimizer = optim.SGD([{'params': model.features.parameters()},
+                       {'params': model.classifier.parameters()},
+                       {'params': model.fc.parameters(), 'lr': config.fc_learning_rate}], lr=config.learning_rate, weight_decay=config.weight_decay, momentum=config.momentum)
+
+scheduler = StepLR(optimizer, step_size=config.decay_epoches, gamma=config.decay_gamma)
 
 
 def train(epoch, writer):
+    scheduler.step()
     model.train()
+    # print learning rate
+    # for param_group in optimizer.param_groups:
+    #     print(param_group['lr'], end='\t')
+    # print('\n')
+
     for batch_idx, (data, target) in enumerate(train_loader):
         target = target.type(torch.FloatTensor)
         data, target = data.cuda(), target.cuda()
