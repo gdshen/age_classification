@@ -64,25 +64,15 @@ class AsianFaceDatasets(data.Dataset):
             facereader = csv.reader(csv_file)
             facereader = list(facereader)[1:]
             self.img_age_list = [(os.path.join(img_dir, row[0].split('\\')[-1]), int(row[-1])) for row in facereader]
-        shuffle(self.img_age_list)
-        portion = ceil(len(self.img_age_list) * 0.7)
-        print(portion)
-        self.train_list = self.img_age_list[:portion]
-        self.test_list = self.img_age_list[portion:]
+        if self.train:
+            shuffle(self.img_age_list)
 
     def __len__(self):
-        if self.train:
-            return len(self.train_list)
-        else:
-            return len(self.test_list)
+        return len(self.img_age_list)
 
     def __getitem__(self, index):
-        if self.train:
-            img = Image.open(self.train_list[index][0])  # all images are in rgb mode
-            age = self.train_list[index][1]
-        else:
-            img = Image.open(self.test_list[index][0])
-            age = self.test_list[index][1]
+        img = Image.open(self.img_age_list[index][0])  # all images are in rgb mode
+        age = self.img_age_list[index][1]
         if self.transform is not None:
             img = self.transform(img)
         if self.target_transform is not None:

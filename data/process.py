@@ -1,8 +1,11 @@
 from datetime import date
+from math import ceil
+
 import scipy.io
 import os
 import csv
 import shutil
+from random import shuffle
 
 
 def extract_age_from_filename(filename: str) -> int:
@@ -90,6 +93,25 @@ def copy_according_to_csv(csv_path, input_dir, ouput_dir):
     print(f'copy {len(filenames)} files')
 
 
+def training_testing_split(csv_path, output_dir, portion):
+    with open(csv_path) as f:
+        csvreader = csv.reader(f)
+        csvreader = list(csvreader)
+        csvreader_header = csvreader[0]
+        csvreader = csvreader[1:]
+        shuffle(csvreader)
+        portion = ceil(portion * len(csvreader))
+        train_list = csvreader[:portion]
+        test_list = csvreader[portion:]
+        with open(os.path.join(output_dir, 'train.csv'), 'w') as train_writer:
+            csvwriter = csv.writer(train_writer)
+            csvwriter.writerows([csvreader_header] + train_list)
+
+        with open(os.path.join(output_dir, 'test.csv'), 'w') as test_writer:
+            csvwriter = csv.writer(test_writer)
+            csvwriter.writerows([csvreader_header] + test_list)
+
+
 if __name__ == '__main__':
     # Process IMDB-WIKI
     # imdb_mat = '/home/gdshen/datasets/face/imdb_crop/imdb.mat'
@@ -98,7 +120,13 @@ if __name__ == '__main__':
     # parsing_mat(wiki_mat, 'wiki', output_path='/home/gdshen/datasets/face/processed')
 
     # Process Asian Data
+    # csv_path = '/home/gdshen/datasets/face/asian/agegenderFilter_frontal.csv'
+    # input_dir = '/home/gdshen/datasets/face/asian/yueda889'
+    # output_dir = '/home/gdshen/datasets/face/asian/images'
+    # copy_according_to_csv(csv_path, input_dir, output_dir)
+
+    # split train test
     csv_path = '/home/gdshen/datasets/face/asian/agegenderFilter_frontal.csv'
-    input_dir = '/home/gdshen/datasets/face/asian/yueda889'
-    output_dir = '/home/gdshen/datasets/face/asian/images'
-    copy_according_to_csv(csv_path, input_dir, output_dir)
+    output_dir = '/home/gdshen/datasets/face/asian/'
+    portion = 0.7
+    training_testing_split(csv_path, output_dir, portion)
