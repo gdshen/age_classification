@@ -8,8 +8,8 @@ class DefaultConfig:
     asian_csv_test = '/home/gdshen/datasets/face/asian/test.csv'
     asian_imgs_dir = '/home/gdshen/datasets/face/asian/images'
     batch_size = 10
-    num_workers = 1
-    log_interval = 10
+    num_workers = 4
+    log_interval = 100
     epoch = 50
     learning_rate = 0.0001
     momentum = 0.9
