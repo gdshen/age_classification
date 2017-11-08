@@ -12,7 +12,7 @@ class Net(nn.Module):
         # for m in self.vgg.modules():
         #     if isinstance(m, nn.Conv2d):
         #         print(m.weight)
-        self.features = nn.Dataparallel(self.vgg.features)
+        self.features = nn.DataParallel(self.vgg.features)
         self.classifier = nn.Sequential(
             nn.Linear(512 * 7 * 7, 4096),
             nn.ReLU(True),
