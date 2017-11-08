@@ -13,7 +13,6 @@ class Net(nn.Module):
         #     if isinstance(m, nn.Conv2d):
         #         print(m.weight)
         self.features = self.vgg.features
-        self.features = nn.DataParallel(self.vgg.features)
         self.classifier = nn.Sequential(
             nn.Linear(512 * 7 * 7, 4096),
             nn.ReLU(True),
@@ -22,9 +21,7 @@ class Net(nn.Module):
             nn.ReLU(True),
             nn.Dropout(0.5),
         )
-        self.classifier = nn.DataParallel(self.classifier)
         self.fc = nn.Linear(4096, 101, False)
-        self.fc = nn.DataParallel(self.fc)
 
     def forward(self, x):
         x = self.features(x)
