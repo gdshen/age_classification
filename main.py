@@ -82,8 +82,8 @@ def train(epoch, writer):
             print(
                 f'Train Epoch: {epoch} [{batch_idx*len(data)}/{len(train_loader.dataset)} ({100 * batch_idx/len(train_loader):.0f}%)]\tLoss: {loss.data[0]:.6f}')
 
-        if epoch % config.checkpoint_interval == 0:
-            torch.save(model.state_dict(), os.path.join(config.checkpoint_dir, f'checkpoint-imdb-{epoch}.pth'))
+    if epoch % config.checkpoint_interval == 0:
+        torch.save(model.state_dict(), os.path.join(config.checkpoint_dir, f'checkpoint-imdb-{epoch}.pth'))
 
 
 def test(epoch, writer):
