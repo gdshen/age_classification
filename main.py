@@ -14,45 +14,47 @@ from torch.optim.lr_scheduler import StepLR
 
 config = DefaultConfig()
 
-train_loader = DataLoader(
-    IMDBWIKIDatasets(config.imdb_csv_train, train=True, transform=transforms.Compose([
-        transforms.Scale((224, 224)),
-        transforms.ToTensor()
-    ])), batch_size=config.batch_size, shuffle=True,
-    num_workers=config.num_workers
-)
-test_loader = DataLoader(
-    IMDBWIKIDatasets(config.imdb_csv_test, train=False, transform=transforms.Compose([
-        transforms.Scale((224, 224)),
-        transforms.ToTensor()
-    ])), batch_size=config.batch_size, shuffle=False,
-    num_workers=config.num_workers
-)
-
 # train_loader = DataLoader(
-#     AsianFaceDatasets(config.asian_csv_train, config.asian_imgs_dir, train=True, transform=transforms.Compose([
+#     IMDBWIKIDatasets(config.imdb_csv_train, train=True, transform=transforms.Compose([
 #         transforms.Scale((224, 224)),
 #         transforms.ToTensor()
 #     ])), batch_size=config.batch_size, shuffle=True,
 #     num_workers=config.num_workers
 # )
-#
 # test_loader = DataLoader(
-#     AsianFaceDatasets(config.asian_csv_test, config.asian_imgs_dir, train=False, transform=transforms.Compose([
+#     IMDBWIKIDatasets(config.imdb_csv_test, train=False, transform=transforms.Compose([
 #         transforms.Scale((224, 224)),
 #         transforms.ToTensor()
 #     ])), batch_size=config.batch_size, shuffle=False,
 #     num_workers=config.num_workers
 # )
 
+train_loader = DataLoader(
+    AsianFaceDatasets(config.asian_csv_train, config.asian_imgs_dir, train=True, transform=transforms.Compose([
+        transforms.Scale((224, 224)),
+        transforms.ToTensor()
+    ])), batch_size=config.batch_size, shuffle=True,
+    num_workers=config.num_workers
+)
+
+test_loader = DataLoader(
+    AsianFaceDatasets(config.asian_csv_test, config.asian_imgs_dir, train=False, transform=transforms.Compose([
+        transforms.Scale((224, 224)),
+        transforms.ToTensor()
+    ])), batch_size=config.batch_size, shuffle=False,
+    num_workers=config.num_workers
+)
+
 model = Net()
 if config.using_pretrain_model:
     model.load_state_dict(torch.load(config.pretrain_model_path))
 model.cuda()
 
-optimizer = optim.SGD([{'params': model.features.parameters()},
-                       {'params': model.classifier.parameters()},
-                       {'params': model.fc.parameters(), 'lr': config.fc_learning_rate}], lr=config.learning_rate, weight_decay=config.weight_decay, momentum=config.momentum)
+fc_params = list(map(id, model.resnet50.fc.parameters()))
+base_params = filter(lambda p: id(p) not in fc_params, model.resnet50.parameters())
+
+optimizer = optim.SGD([{'params': base_params},
+                       {'params': model.resnet50.fc.parameters(), 'lr': config.fc_learning_rate}], lr=config.learning_rate, weight_decay=config.weight_decay, momentum=config.momentum)
 
 scheduler = StepLR(optimizer, step_size=config.decay_epoches, gamma=config.decay_gamma)
 
@@ -72,6 +74,7 @@ def train(epoch, writer):
         optimizer.zero_grad()
 
         output = model(data)
+        output = output @ Variable(torch.arange(0, 101)).view(-1, 1).cuda()
         loss = F.l1_loss(output, target)
         loss.backward()
         optimizer.step()
@@ -83,7 +86,7 @@ def train(epoch, writer):
                 f'Train Epoch: {epoch} [{batch_idx*len(data)}/{len(train_loader.dataset)} ({100 * batch_idx/len(train_loader):.0f}%)]\tLoss: {loss.data[0]:.6f}')
 
     if epoch % config.checkpoint_interval == 0:
-        torch.save(model.state_dict(), os.path.join(config.checkpoint_dir, f'checkpoint-imdb-{epoch}.pth'))
+        torch.save(model.state_dict(), os.path.join(config.checkpoint_dir, f'checkpoint_new-asian3-{epoch}.pth'))
 
 
 def test(epoch, writer):
@@ -94,6 +97,7 @@ def test(epoch, writer):
         data, target = data.cuda(), target.cuda()
         data, target = Variable(data, volatile=True), Variable(target)
         output = model(data)
+        output = output @ Variable(torch.arange(0, 101)).view(-1, 1).cuda()
         loss = F.l1_loss(output, target).cpu()
         test_loss += loss.data[0] * config.batch_size
     test_loss /= len(test_loader.dataset)

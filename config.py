@@ -10,7 +10,7 @@ class DefaultConfig:
     batch_size = 10
     num_workers = 4
     log_interval = 100
-    epoch = 50
+    epoch = 30
     learning_rate = 0.0001
     momentum = 0.9
     checkpoint_interval = 10
@@ -21,4 +21,4 @@ class DefaultConfig:
     decay_epoches = 10
     decay_gamma = 0.1
     using_pretrain_model = False
-    pretrain_model_path = '/home/gdshen/datasets/checkpoint-imdb-50.pth'
+    pretrain_model_path = '/home/gdshen/datasets/checkpoint/checkpoint_new-imdb-30.pth'
