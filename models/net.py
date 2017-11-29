@@ -15,4 +15,6 @@ class Net(nn.Module):
         x = self.resnet50(x)
         x = F.softmax(x)
 
+        x = x @ Variable(torch.arange(0, 101)).view(-1, 1).cuda()
+
         return x

@@ -74,7 +74,6 @@ def train(epoch, writer):
         optimizer.zero_grad()
 
         output = model(data)
-        output = output @ Variable(torch.arange(0, 101)).view(-1, 1).cuda()
         loss = F.l1_loss(output, target)
         loss.backward()
         optimizer.step()
@@ -97,7 +96,6 @@ def test(epoch, writer):
         data, target = data.cuda(), target.cuda()
         data, target = Variable(data, volatile=True), Variable(target)
         output = model(data)
-        output = output @ Variable(torch.arange(0, 101)).view(-1, 1).cuda()
         loss = F.l1_loss(output, target).cpu()
         test_loss += loss.data[0] * config.batch_size
     test_loss /= len(test_loader.dataset)

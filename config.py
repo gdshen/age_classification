@@ -20,5 +20,5 @@ class DefaultConfig:
     weight_decay = 0.0005
     decay_epoches = 10
     decay_gamma = 0.1
-    using_pretrain_model = False
-    pretrain_model_path = '/home/gdshen/datasets/checkpoint/checkpoint_new-imdb-30.pth'
+    using_pretrain_model = True
+    pretrain_model_path = '/home/gdshen/datasets/checkpoint/checkpoint_new-asian2-30.pth'
