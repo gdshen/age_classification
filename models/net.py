@@ -1,8 +1,6 @@
-from torchvision.models import vgg16, resnet50
 import torch.nn as nn
-from torch.autograd import Variable
-import torch
 import torch.nn.functional as F
+from torchvision.models import resnet50
 
 
 class Net(nn.Module):
@@ -13,8 +11,5 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = self.resnet50(x)
-        x = F.softmax(x)
-
-        x = x @ Variable(torch.arange(0, 101)).view(-1, 1).cuda()
-
+        x = F.softmax(x, dim=1)
         return x

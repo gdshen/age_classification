@@ -1,11 +1,12 @@
+import csv
+import glob
+import os
+import shutil
 from datetime import date
 from math import ceil
+from random import shuffle
 
 import scipy.io
-import os
-import csv
-import shutil
-from random import shuffle
 
 
 def extract_age_from_filename(filename: str) -> int:
@@ -112,6 +113,31 @@ def training_testing_split(csv_path, output_dir, portion):
             csvwriter.writerows([csvreader_header] + test_list)
 
 
+def merge_and_random_split(csv_files_path, train_portion, train_csv_path, test_csv_path):
+    # csv_files_path = '/home/gdshen/datasets/face/whole/split_age'
+    csv_file_paths = glob.glob(csv_files_path + '/*.csv')
+    # train_portion = 0.8
+    train_files_paths = []
+    test_files_paths = []
+    for csv_file_path in csv_file_paths:
+        with open(csv_file_path) as f:
+            csv_file_reader = csv.reader(f)
+            csv_file_reader = list(csv_file_reader)[1:]
+            shuffle(csv_file_reader)
+
+            boundary = int(train_portion * len(csv_file_reader))
+            train_files_paths.extend(csv_file_reader[:boundary])
+            test_files_paths.extend(csv_file_reader[boundary:])
+
+    with open(train_csv_path, 'w') as f:
+        train_csv_writer = csv.writer(f)
+        train_csv_writer.writerows(train_files_paths)
+
+    with open(test_csv_path, 'w') as f:
+        test_csv_writer = csv.writer(f)
+        test_csv_writer.writerows(test_files_paths)
+
+
 if __name__ == '__main__':
     # Process IMDB-WIKI
     # imdb_mat = '/home/gdshen/datasets/face/imdb_crop/imdb.mat'
@@ -132,7 +158,11 @@ if __name__ == '__main__':
     # training_testing_split(csv_path, output_dir, portion)
 
     # split imdb train test
-    csv_path = '/home/gdshen/datasets/face/processed/imdb.csv'
-    output_dir = '/home/gdshen/datasets/face/processed'
-    portion = 0.7
-    training_testing_split(csv_path, output_dir, portion)
+    # csv_path = '/home/gdshen/datasets/face/processed/imdb.csv'
+    # output_dir = '/home/gdshen/datasets/face/processed'
+    # portion = 0.7
+    # training_testing_split(csv_path, output_dir, portion)
+
+    # merge split age and random shuffle age
+    merge_and_random_split('/home/gdshen/datasets/face/whole/split_age', 0.8,
+                           '/home/gdshen/datasets/face/whole/train.csv', '/home/gdshen/datasets/face/whole/test.csv')

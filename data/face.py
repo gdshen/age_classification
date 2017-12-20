@@ -1,8 +1,9 @@
-import torch.utils.data as data
 import csv
-from PIL import Image
-from random import shuffle
 import os
+from random import shuffle
+
+import torch.utils.data as data
+from PIL import Image
 
 
 class IMDBWIKIDatasets(data.Dataset):
@@ -50,7 +51,7 @@ class AsianFaceDatasets(data.Dataset):
         with open(csv_path, 'r') as csv_file:
             facereader = csv.reader(csv_file)
             facereader = list(facereader)[1:]
-            self.img_age_list = [(os.path.join(img_dir, row[0].split('\\')[-1]), int(row[-1])) for row in facereader]
+            self.img_age_list = [(os.path.join(img_dir, row[0].split('/')[-1]), int(row[-1])) for row in facereader]
         if self.train:
             shuffle(self.img_age_list)
 
@@ -64,6 +65,29 @@ class AsianFaceDatasets(data.Dataset):
             img = self.transform(img)
         if self.target_transform is not None:
             age = self.target_transform(age)
+        return img, age
+
+
+class WholeFaceDatasets(data.Dataset):
+    def __init__(self, csv_path, img_base_dir, train=True, transform=None):
+        self.train = train
+        self.transform = transform
+        with open(csv_path) as csv_file:
+            facereader = csv.reader(csv_file)
+            facereader = list(facereader)
+            self.img_age_list = [(os.path.join(img_base_dir, row[0]), int(row[1])) for row in facereader]
+
+        if self.train:
+            shuffle(self.img_age_list)
+
+    def __len__(self):
+        return len(self.img_age_list)
+
+    def __getitem__(self, index):
+        img = Image.open(self.img_age_list[index][0])
+        age = self.img_age_list[index][1]
+        if self.transform is not None:
+            img = self.transform(img)
         return img, age
 
 
